@@ -41,14 +41,14 @@ class GPUCB1_Learner(GP_Learner):
         if index == -1:
             # If all arms have been pulled at least once, calculate the UCB1 values for each arm.
             t = np.sum(self.price_curve.arm_selections) + 1  # Total number of arm selections so far
-            ucb_values = self.cumulative_rewards / self.price_curve.arm_selections + np.sqrt(2 * np.log(t) / self.price_curve.arm_selections)
+            ucb_values = self.cumulative_rewards* (self.prices - self.cost*np.ones(self.n_arms))/ self.price_curve.arm_selections + np.sqrt(2 * np.log(t) / self.price_curve.arm_selections)
             # Sample values from normal distributions for click cost and click daily curves.
             sampled_values_cc = np.random.normal(self.click_cost_curve.means, self.click_cost_curve.sigmas)
             sampled_values_dc = np.random.normal(self.click_daily_curve.means, self.click_daily_curve.sigmas)
             # Calculate the expected reward for each arm using UCB1 values and sampled values.
             reward_arm = np.array([
                 np.max(
-                    sampled_values_dc * ucb_values[i] * (self.prices[i] - self.cost) - sampled_values_cc
+                    sampled_values_dc * ucb_values[i]  - sampled_values_cc
                 )
                 for i in range(n_arms)
             ])
